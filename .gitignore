@@ -5,6 +5,7 @@
 /**/*.bin.gz
 /**/*.elf
 /**/*.img
+/**/*.mod
 /bochsout.txt
 /bx_enh_dbg.ini
 .vscode

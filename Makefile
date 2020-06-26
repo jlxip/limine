@@ -2,9 +2,9 @@ CC = cc
 CFLAGS = -O2 -pipe -Wall -Wextra
 PATH := $(shell pwd)/toolchain/bin:$(PATH)
 
-.PHONY: all clean stage2 stage2-clean decompressor decompressor-clean toolchain test.img echfs-test ext2-test fat32-test
+.PHONY: all clean stage2 stage2-clean decompressor decompressor-clean modules toolchain test.img echfs-test ext2-test fat32-test
 
-all: stage2 decompressor
+all: stage2 decompressor modules
 	gzip -n -9 < stage2/stage2.bin > stage2/stage2.bin.gz
 	cd bootsect && nasm bootsect.asm -fbin -o ../limine.bin
 
@@ -28,6 +28,9 @@ decompressor-clean:
 
 test-clean:
 	$(MAKE) -C test clean
+
+modules:
+	cd modules && ./make_modules.sh
 
 toolchain:
 	cd toolchain && ./make_toolchain.sh -j`nproc`

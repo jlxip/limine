@@ -7,6 +7,7 @@
 #include <lib/config.h>
 #include <sys/e820.h>
 #include <lib/print.h>
+#include <lib/module.h>
 #include <fs/file.h>
 #include <lib/elf.h>
 #include <mm/pmm.h>
@@ -23,6 +24,9 @@ void entry(int boot_drive) {
     term_textmode();
 
     print("Limine " LIMINE_VERSION "\n\n");
+
+    print("Initialising %u built-in modules at %x...\n", module_count, modules);
+    init_modules(module_count, modules);
 
     print("Boot drive: %x\n", boot_drive);
 

@@ -180,4 +180,24 @@ modules_end:
 
 modules_count_s: dd modules_count
 
+%assign modules_count 0
+
+%macro module 1
+%1_start:
+dd %1_end - %1_start
+dd 0, 0, 0
+%defstr %1_path ../../modules/%1/%1.mod
+incbin %1_path
+align 16
+%1_end:
+%assign modules_count modules_count+1
+%endmacro
+
+align 16
+modules_start:
+%include '../../builtin_modules.list'
+modules_end:
+
+modules_count_s: dd modules_count
+
 times 32768-($-$$) db 0

@@ -5,16 +5,16 @@ CFLAGS = -Os -pipe -Wall -Wextra
 INTERNAL_CFLAGS = \
 	-ffreestanding \
     -ffunction-sections \
-    -fPIC \
+    -fno-pic \
 	-masm=intel \
-	-fno-pic \
 	-mno-sse \
 	-mno-sse2 \
 	-mno-mmx \
 	-mno-80387 \
+    -mpreferred-stack-boundary=2 \
 	-ffreestanding \
 	-fno-stack-protector \
-	-I. \
+	-I. -I../../src \
 	-Wno-address-of-packed-member
 
 LDFLAGS = -O2
@@ -29,7 +29,7 @@ INTERNAL_LDFLAGS = \
 .PHONY: all clean
 
 C_FILES := $(shell find ./ -type f -name '*.c' | sort)
-OBJ := $(C_FILES:.c=.o)
+OBJ := $(C_FILES:.c=.o) ../trampoline.o
 
 all: $(MODNAME).mod
 

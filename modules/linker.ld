@@ -6,7 +6,7 @@ SECTIONS
     . = 0;
 
     .text : {
-        *(.text.main)
+        *(.text.trampoline)
         *(.text*)
     }
 

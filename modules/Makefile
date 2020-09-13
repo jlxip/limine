@@ -1,43 +1,40 @@
-CC = ../../toolchain/bin/i386-elf-gcc
-
-CFLAGS = -Os -pipe -Wall -Wextra
+OPT_LEVEL = z
+CFLAGS = -pipe -Wall -Wextra
 
 INTERNAL_CFLAGS = \
+	-O$(OPT_LEVEL) \
+	-std=gnu99 \
 	-ffreestanding \
-    -ffunction-sections \
-    -fno-pic \
-	-masm=intel \
+	-flto \
+	-mno-80387 \
+	-mno-mmx \
 	-mno-sse \
 	-mno-sse2 \
-	-mno-mmx \
-	-mno-80387 \
-    -mpreferred-stack-boundary=2 \
-	-ffreestanding \
-	-fno-stack-protector \
 	-I. -I../../src \
 	-Wno-address-of-packed-member
 
-LDFLAGS = -O2
-
 INTERNAL_LDFLAGS = \
+	-static \
 	-nostdlib \
-	-no-pie \
-	-lgcc \
-	-static-libgcc \
-	-T../linker.ld
+	-T../linker.ld \
+	-no-pie
 
 .PHONY: all clean
 
 C_FILES := $(shell find ./ -type f -name '*.c' | sort)
-OBJ := $(C_FILES:.c=.o) ../trampoline.o
+BC := $(C_FILES:.c=.bc)
 
 all: $(MODNAME).mod
 
-$(MODNAME).mod: $(OBJ)
-	$(CC) $(OBJ) $(LDFLAGS) $(INTERNAL_LDFLAGS) -o $@
+$(MODNAME).mod: $(BC)
+	llvm-link $(BC) -o bundle.bc
+	opt --O$(OPT_LEVEL) bundle.bc -o optimised_bundle.bc
+	clang --target=i386-elf -O$(OPT_LEVEL) -c optimised_bundle.bc -o optimised_bundle.o
+	ld.lld optimised_bundle.o $(INTERNAL_LDFLAGS) -o $(MODNAME).elf
+	llvm-objcopy -O binary $(MODNAME).elf $@
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(INTERNAL_CFLAGS) -c $< -o $@
+%.bc: %.c
+	clang --target=i386-elf $(CFLAGS) $(INTERNAL_CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(BC)

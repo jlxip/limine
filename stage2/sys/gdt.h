@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-void get_set_descriptor(int entry, size_t base, size_t page_count);
+void gdt_set_descriptor(int entry, size_t base, size_t page_count);
 
 #endif

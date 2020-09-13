@@ -8,7 +8,7 @@ struct gdt_entry {
     uint8_t access;
     uint8_t granularity;
     uint8_t base_high;
-};
+} __attribute__((packed));
 
 void gdt_set_descriptor(int entry, size_t base, size_t page_count) {
     struct {
@@ -23,10 +23,10 @@ void gdt_set_descriptor(int entry, size_t base, size_t page_count) {
         : "memory"
     );
 
-    gdt.ptr[entry]->base_low = (uint16_t)(base & 0x0000ffff);
-    gdt.ptr[entry]->base_mid = (uint8_t)((base & 0x00ff0000) / 0x10000);
-    gdt.ptr[entry]->base_high = (uint8_t)((base & 0xff000000) / 0x1000000);
+    gdt.ptr[entry].base_low = (uint16_t)(base & 0x0000ffff);
+    gdt.ptr[entry].base_mid = (uint8_t)((base & 0x00ff0000) / 0x10000);
+    gdt.ptr[entry].base_high = (uint8_t)((base & 0xff000000) / 0x1000000);
 
-    gdt.ptr[entry]->limit_low = (uint16_t)((page_count - 1) & 0x0000ffff);
-    gdt.ptr[entry]->granularity = (uint8_t)((gdt[entry].granularity & 0xf0) | ((page_count & 0x000f0000) / 0x10000));
+    gdt.ptr[entry].limit_low = (uint16_t)((page_count - 1) & 0x0000ffff);
+    gdt.ptr[entry].granularity = (uint8_t)((gdt.ptr[entry].granularity & 0xf0) | ((page_count & 0x000f0000) / 0x10000));
 }

@@ -12,7 +12,7 @@ struct module {
 struct module_header {
     size_t size;
     size_t padding[3];
-    void *start[];
+    char   start[];
 };
 
 void init_module(struct module *m);

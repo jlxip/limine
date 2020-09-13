@@ -138,9 +138,14 @@ stage15:
     mov gs, ax
     mov ss, ax
 
-    mov esi, modules_start
-    mov ecx, modules_end - modules_start
-    mov ebx, dword [modules_count_s]
+    ; Stack at a high address so it's accessible by modules
+    mov esp, 0x7ff00
+
+    and edx, 0xff
+    push edx
+
+    push dword [modules_count_s]
+    push (modules_start - 0x8000) + 0x70000
 
     push stage2.size
     push (stage2 - 0x8000) + 0x70000
@@ -159,26 +164,6 @@ align 16
 stage2:
 incbin '../stage2/stage2.bin.gz'
 .size: equ $ - stage2
-
-%assign modules_count 0
-
-%macro module 1
-%1_start:
-dd %1_end - %1_start
-dd 0, 0, 0
-%defstr %1_path ../../modules/%1/%1.mod
-incbin %1_path
-align 16
-%1_end:
-%assign modules_count modules_count+1
-%endmacro
-
-align 16
-modules_start:
-%include '../../builtin_modules.list'
-modules_end:
-
-modules_count_s: dd modules_count
 
 %assign modules_count 0
 

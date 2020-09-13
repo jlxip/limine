@@ -2,6 +2,10 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <lib/print.h>
+#include <lib/module.h>
+#include <lib/asm.h>
+#include <lib/blib.h>
+#include <lib/gdt.h>
 
 #define MAX_MODULES 16
 
@@ -13,7 +17,7 @@ void init_module(struct module *m) {
         panic("Trying too load more than MAX_MODULES modules.\n");
 
     struct module_header *h = m->ptr;
-    call_to_module(h->start, NULL, modules_i);
+    call_to_module((struct module *)h->start, NULL, modules_i);
 
     modules[modules_i++] = *m;
 }
@@ -22,7 +26,7 @@ void init_modules(size_t count, struct module_header *modules) {
     for (size_t i = 0; i < count; i++) {
         struct module m = {
             (void *)modules,
-            modules->size.
+            modules->size
         };
         init_module(&m);
         modules = (void *)((size_t)modules + modules->size);
@@ -31,14 +35,14 @@ void init_modules(size_t count, struct module_header *modules) {
 
 void *call_to_module(struct module *m, void *ptr, ...) {
     va_list args;
-    va_start(args, addr);
+    va_start(args, ptr);
 
     gdt_set_descriptor(7, (size_t)m->ptr, m->size / 4096);
     gdt_set_descriptor(8, (size_t)m->ptr, m->size / 4096);
 
     void *ret;
 
-    asm volatile (
+    ASM(
         "pusha\n\t"
 
         "mov dx, 0x40\n\t"
@@ -67,10 +71,12 @@ void *call_to_module(struct module *m, void *ptr, ...) {
         "mov %0, eax\n\t"
 
         "popa\n\t"
-        : "=c"(ret)
+        , "=c"(ret)
         : "a"(args), "b"(ptr)
         : "memory"
     );
 
     va_end(args);
+
+    return ret;
 }

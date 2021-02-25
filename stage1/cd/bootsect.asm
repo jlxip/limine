@@ -76,7 +76,7 @@ err:
     jmp err
 
 %include 'read_2k_sectors.asm'
-%include '../gdt.inc'
+%include '../gdt.asm'
 
 BITS 32
 pmode:
@@ -103,12 +103,12 @@ pmode:
 ; Align stage2 to 2K ON DISK
 ALIGN2K
 DEC_LBA_OFFSET equ ($-$$)/2048
-incbin '../decompressor/decompressor.bin'
+incbin '../../decompressor/decompressor.bin'
 
 ALIGN2K
 STAGE2_START equ $-$$
 STAGE2_LBA_OFFSET equ STAGE2_START/2048
 DEC_LBA_COUNT equ STAGE2_LBA_OFFSET - DEC_LBA_OFFSET
-incbin '../stages/stage2.bin.gz'
+incbin '../../stage23/stage2.bin.gz'
 STAGE2_SIZE equ ($-$$) - STAGE2_START
 STAGE2_LBA_COUNT equ (2047 + $-$$)/2048

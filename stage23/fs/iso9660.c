@@ -69,7 +69,7 @@ struct iso9660_primary_volume {
 
 // --- Implementation ---
 
-stage3_text static void iso9660_find_PVD(struct iso9660_volume_descriptor *desc, struct volume *vol) {
+static void iso9660_find_PVD(struct iso9660_volume_descriptor *desc, struct volume *vol) {
     uint32_t lba = ISO9660_FIRST_VOLUME_DESCRIPTOR;
     while (true) {
         volume_read(vol, desc, lba * ISO9660_SECTOR_SIZE, ISO9660_SECTOR_SIZE);
@@ -86,7 +86,7 @@ stage3_text static void iso9660_find_PVD(struct iso9660_volume_descriptor *desc,
     }
 }
 
-stage3_text static void iso9660_cache_root(struct volume *vol,
+static void iso9660_cache_root(struct volume *vol,
                                void **root,
                                uint32_t *root_size) {
     struct iso9660_primary_volume pv;
@@ -97,7 +97,7 @@ stage3_text static void iso9660_cache_root(struct volume *vol,
     volume_read(vol, *root, pv.root.extent.little * ISO9660_SECTOR_SIZE, *root_size);
 }
 
-stage3_text static int iso9660_strcmp(const char *a, const char *b, size_t size) {
+static int iso9660_strcmp(const char *a, const char *b, size_t size) {
     while (size--) {
         char ca = *a++;
         char cb = *b++;
@@ -108,7 +108,7 @@ stage3_text static int iso9660_strcmp(const char *a, const char *b, size_t size)
     return 0;
 }
 
-stage3_text static struct iso9660_directory_entry *iso9660_find(void *buffer, uint32_t size, const char *filename) {
+static struct iso9660_directory_entry *iso9660_find(void *buffer, uint32_t size, const char *filename) {
     // The file can be either FILENAME or FILENAME;1
     uint32_t len = strlen(filename);
     char finalfile[len + 2];
@@ -137,7 +137,7 @@ stage3_text static struct iso9660_directory_entry *iso9660_find(void *buffer, ui
 
 
 // --- Public functions ---
-stage3_text int iso9660_check_signature(struct volume *vol) {
+int iso9660_check_signature(struct volume *vol) {
     char buf[6];
     const uint64_t signature = ISO9660_FIRST_VOLUME_DESCRIPTOR * ISO9660_SECTOR_SIZE + 1;
     volume_read(vol, buf, signature, 5);
@@ -145,7 +145,7 @@ stage3_text int iso9660_check_signature(struct volume *vol) {
     return !strcmp(buf, "CD001");
 }
 
-stage3_text int iso9660_open(struct iso9660_file_handle *ret, struct volume *vol, const char *path) {
+int iso9660_open(struct iso9660_file_handle *ret, struct volume *vol, const char *path) {
     iso9660_cache_root(vol, &ret->context.root, &ret->context.root_size);
 
     ret->context.vol = *vol;
@@ -186,7 +186,7 @@ stage3_text int iso9660_open(struct iso9660_file_handle *ret, struct volume *vol
     return 0;
 }
 
-stage3_text int iso9660_read(struct iso9660_file_handle *file, void *buf, uint64_t loc, uint64_t count) {
+int iso9660_read(struct iso9660_file_handle *file, void *buf, uint64_t loc, uint64_t count) {
     volume_read(&file->context.vol, buf, file->LBA * ISO9660_SECTOR_SIZE + loc, count);
     return 0;
 }
